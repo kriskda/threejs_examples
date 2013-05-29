@@ -28,7 +28,7 @@
 			scene.add( ambientLight );
 
 			var directionalLight = new THREE.DirectionalLight( 0xffffff );
-			directionalLight.position.set( 2, 0.75, 0.5 ).normalize();
+			directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
 			scene.add( directionalLight );
 
 			/* Set positions */
@@ -41,11 +41,11 @@
 			var gamma = 0.01;
 
 			var cameraController = CameraController(camera, height, width);
-			var pendulumViewA = PendulumView(L, -10, 10, 0, theta);
+			var pendulumViewA = PendulumView(L, -10, 10, 0, theta, "rgb(255,0,0)");
 			var pendulumModelA = PendulumModel(pendulumViewA, 9.81, L, theta, v, gamma);
 			pendulumViewA.addToScene(scene);
 
-			var pendulumViewB = PendulumView(L, 10, 10, 0, theta);
+			var pendulumViewB = PendulumView(L, 10, 10, 0, theta, "rgb(0,255,0)");
 			var pendulumModelB = PendulumModel(pendulumViewB, 1.57, L, theta, v, gamma);
 			pendulumViewB.addToScene(scene);
 			
@@ -68,13 +68,13 @@
 
 
 			/* Pendulum view which is just sphere and line with two vertices connected together  */
-			function PendulumView(L, x, y, z, theta0) {
+			function PendulumView(L, x, y, z, theta0, sphereColor) {
 				var sphere, line;
 				init();
 
 				function init() {
 					var sphereGeometry = new THREE.SphereGeometry( 1 );
-					var sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+					var sphereMaterial = new THREE.MeshPhongMaterial({ color: sphereColor });
 						
 					sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
 
