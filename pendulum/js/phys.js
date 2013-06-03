@@ -3,23 +3,39 @@ var width = container.offsetWidth;
 var height = container.offsetHeight;
 				   
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 60, width / height, 0.1, 1000 );
-//var renderer = new THREE.CanvasRenderer( {antialias: true, preserveDrawingBuffer: false} );
-var renderer = new THREE.WebGLRenderer( {antialias: true, preserveDrawingBuffer: true} );
+var camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+//var renderer = new THREE.CanvasRenderer({antialias: true, preserveDrawingBuffer: true});
+var renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
+
 renderer.setSize( width, height);
+renderer.shadowMapEnabled = true;
+renderer.shadowMapSoft = true;
+
+renderer.shadowCameraNear = 3;
+renderer.shadowCameraFar = camera.far;
+renderer.shadowCameraFov = 50;
+
+renderer.shadowMapBias = 0.0039;
+renderer.shadowMapDarkness = 0.5;
+renderer.shadowMapWidth = 1024;
+renderer.shadowMapHeight = 1024;
+
 container.appendChild(renderer.domElement);
 	
 /* GRID */
-var plane = new THREE.Mesh( new THREE.PlaneGeometry( 200, 200, 25, 25 ), new THREE.MeshBasicMaterial( { color: 0x555555, wireframe: true } ) );
+var plane = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100, 10, 10 ), new THREE.MeshPhongMaterial({color: "rgb(200,200,200)", wireframe: false}));
 plane.rotation.x = - Math.PI / 2;
-scene.add( plane );
+plane.receiveShadow = true;
+scene.add(plane);
 		
 /* Lights */
-var ambientLight = new THREE.AmbientLight( 0x606060 );
-scene.add( ambientLight );
+//var ambientLight = new THREE.AmbientLight(0x606060);
+//scene.add( ambientLight );
 
-var directionalLight = new THREE.DirectionalLight( 0xffffff );
-directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
+var directionalLight = new THREE.DirectionalLight(0xffffff);
+directionalLight.position.set(1, 10, 0).normalize();
+directionalLight.castShadow = true;
+
 scene.add( directionalLight );
 
 /* Set positions */
@@ -28,35 +44,52 @@ camera.position.z = 25;
 
 var theta = Math.PI / 2;
 var v = 0;
-var L = 10;
+var L = 5;
 var gamma = 0.01;
+var dt = 0.001;
 
 var cameraController = CameraController(camera, height, width);
-var pendulumViewA = PendulumView(L, -10, 10, 0, theta, "rgb(255,0,0)");
+var pendulumViewA = PendulumView(L, -5, 10, 0, theta, "rgb(255,0,0)");
 var pendulumModelA = PendulumModel(pendulumViewA, 9.81, L, theta, v, gamma);
 pendulumViewA.addToScene(scene);
 
-var pendulumViewB = PendulumView(L, 10, 10, 0, theta, "rgb(0,255,0)");
+var pendulumViewB = PendulumView(L, 5, 10, 0, theta, "rgb(0,255,0)");
 var pendulumModelB = PendulumModel(pendulumViewB, 1.57, L, theta, v, gamma);
 pendulumViewB.addToScene(scene);
 
+var currentTime = getTimeInSeconds();
+var accumulator = 0;
+var time = 0;
+
 render();
-			
+
 /* Rendering function */
 function render() {
-	requestAnimationFrame(render);	
+	newTime = getTimeInSeconds();
+	frameTime = newTime - currentTime;
+        currentTime = newTime;
 
-	for (var i = 0 ; i < 5 ; i++) {
-		pendulumModelA.calculateTimeStep();
-		pendulumModelB.calculateTimeStep();
+        accumulator += frameTime;
+
+	while ( accumulator >= dt ) {
+		pendulumModelA.calculateTimeStep(dt);
+		pendulumModelB.calculateTimeStep(dt);
+
+		accumulator -= dt;
+		time += dt;
 	}
 				
+	document.getElementById('timer').innerHTML = Math.round(time * 100) / 100;
 	pendulumModelA.updateView();	
-	pendulumModelB.updateView();	
-								
+	pendulumModelB.updateView();									
 	cameraController.updateState();	
 
+	requestAnimationFrame(render);	
 	renderer.render(scene, camera);
+}
+
+function getTimeInSeconds() {
+	return new Date().getTime() / 1000;
 }
 
 /* Pendulum view which is just sphere and line with two vertices connected together  */
@@ -65,10 +98,11 @@ function PendulumView(L, x, y, z, theta0, sphereColor) {
 	init();
 
 	function init() {
-		var sphereGeometry = new THREE.SphereGeometry( 1 );
+		var sphereGeometry = new THREE.SphereGeometry(0.5);
 		var sphereMaterial = new THREE.MeshPhongMaterial({ color: sphereColor });
 						
 		sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+		sphere.castShadow = true;
 
 		var lineGeometry = new THREE.Geometry();
 		var lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 1.5 });
@@ -77,6 +111,7 @@ function PendulumView(L, x, y, z, theta0, sphereColor) {
 		lineGeometry.vertices.push(new THREE.Vector3(sphere.position.x, sphere.position.y, sphere.position.z));
 
 		line = new THREE.Line(lineGeometry, lineMaterial);
+		line.castShadow = true;
 
 		move(theta0);					
 	};
@@ -102,11 +137,10 @@ function PendulumView(L, x, y, z, theta0, sphereColor) {
 }
 
 /* Pendulum model which contains equation of motion and simple Euler integration scheme. Model updates view more or less as in MVC */
-function PendulumModel(view, g, L, theta, v, gamma) {
-	var dt = 0.01;				
+function PendulumModel(view, g, L, theta, v, gamma) {				
 	var theta, v;
 			
-	function calculateTimeStep() {
+	function calculateTimeStep(dt) {
 		theta  = theta + v*dt;
 		v = v + (- g / L * Math.sin(theta)  - gamma * v) * dt;	
 	};
