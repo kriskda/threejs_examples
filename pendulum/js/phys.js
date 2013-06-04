@@ -3,57 +3,39 @@ var width = container.offsetWidth;
 var height = container.offsetHeight;
 				   
 var scene = new THREE.Scene();
+
 var camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+camera.position.y = 10;
+camera.position.z = 25;
+
 //var renderer = new THREE.CanvasRenderer({antialias: true, preserveDrawingBuffer: true});
 var renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
-
 renderer.setSize( width, height);
-renderer.shadowMapEnabled = true;
-renderer.shadowMapSoft = true;
-
-renderer.shadowCameraNear = 3;
-renderer.shadowCameraFar = camera.far;
-renderer.shadowCameraFov = 50;
-
-renderer.shadowMapBias = 0.0039;
-renderer.shadowMapDarkness = 0.5;
-renderer.shadowMapWidth = 1024;
-renderer.shadowMapHeight = 1024;
 
 container.appendChild(renderer.domElement);
 	
 /* GRID */
-var plane = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100, 10, 10 ), new THREE.MeshPhongMaterial({color: "rgb(200,200,200)", wireframe: false}));
-plane.rotation.x = - Math.PI / 2;
-plane.receiveShadow = true;
-scene.add(plane);
+var planeHorizontal = new THREE.Mesh(new THREE.PlaneGeometry(100, 100, 20, 20), new THREE.MeshPhongMaterial({color: "rgb(0, 0, 0)", wireframe: true}));
+planeHorizontal.rotation.x = - Math.PI / 2;
+scene.add(planeHorizontal);
 		
 /* Lights */
-//var ambientLight = new THREE.AmbientLight(0x606060);
-//scene.add( ambientLight );
+var ambientLight = new THREE.AmbientLight(0x606060);
+scene.add( ambientLight );
 
-var directionalLight = new THREE.DirectionalLight(0xffffff);
-directionalLight.position.set(1, 10, 0).normalize();
-directionalLight.castShadow = true;
-
+var directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+directionalLight.position.set(10, 50, 50);
 scene.add( directionalLight );
 
-/* Set positions */
-camera.position.y = 10;
-camera.position.z = 25;
-
-var theta = Math.PI / 2;
-var v = 0;
-var L = 5;
-var gamma = 0.01;
-var dt = 0.001;
+/* Phys initial values */
+var theta = Math.PI / 2, v = 0, L = 5, gamma = 0.01, dt = 0.001;
 
 var cameraController = CameraController(camera, height, width);
-var pendulumViewA = PendulumView(L, -5, 10, 0, theta, "rgb(255,0,0)");
+var pendulumViewA = PendulumView(L, -10, 7, 0, theta, "rgb(255,0,0)");
 var pendulumModelA = PendulumModel(pendulumViewA, 9.81, L, theta, v, gamma);
 pendulumViewA.addToScene(scene);
 
-var pendulumViewB = PendulumView(L, 5, 10, 0, theta, "rgb(0,255,0)");
+var pendulumViewB = PendulumView(L, 10, 7, 0, theta, "rgb(0,255,0)");
 var pendulumModelB = PendulumModel(pendulumViewB, 1.57, L, theta, v, gamma);
 pendulumViewB.addToScene(scene);
 
@@ -61,30 +43,30 @@ var currentTime = getTimeInSeconds();
 var accumulator = 0;
 var time = 0;
 
-render();
+animate();
 
 /* Rendering function */
-function render() {
+function animate() {
 	newTime = getTimeInSeconds();
 	frameTime = newTime - currentTime;
         currentTime = newTime;
 
         accumulator += frameTime;
 
-	while ( accumulator >= dt ) {
+	while (accumulator >= dt) {
 		pendulumModelA.calculateTimeStep(dt);
 		pendulumModelB.calculateTimeStep(dt);
 
 		accumulator -= dt;
 		time += dt;
 	}
-				
-	document.getElementById('timer').innerHTML = Math.round(time * 100) / 100;
+		
+	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s";
 	pendulumModelA.updateView();	
 	pendulumModelB.updateView();									
 	cameraController.updateState();	
 
-	requestAnimationFrame(render);	
+	requestAnimationFrame(animate);	
 	renderer.render(scene, camera);
 }
 
@@ -94,24 +76,30 @@ function getTimeInSeconds() {
 
 /* Pendulum view which is just sphere and line with two vertices connected together  */
 function PendulumView(L, x, y, z, theta0, sphereColor) {
-	var sphere, line;
+	var sphere, line, yAxis;
 	init();
 
 	function init() {
-		var sphereGeometry = new THREE.SphereGeometry(0.5);
+		var sphereGeometry = new THREE.SphereGeometry(0.4, 10, 10);
 		var sphereMaterial = new THREE.MeshPhongMaterial({ color: sphereColor });
 						
 		sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-		sphere.castShadow = true;
 
 		var lineGeometry = new THREE.Geometry();
-		var lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 1.5 });
+		var lineMaterial = new THREE.LineBasicMaterial({color: 0x000000, lineWidth: 1});
 
 		lineGeometry.vertices.push(new THREE.Vector3(x, y, z));
 		lineGeometry.vertices.push(new THREE.Vector3(sphere.position.x, sphere.position.y, sphere.position.z));
 
 		line = new THREE.Line(lineGeometry, lineMaterial);
-		line.castShadow = true;
+
+		var axisGeometry = new THREE.Geometry();
+		var axisMaterial = new THREE.LineDashedMaterial({color: "rgb(150,150,150)", lineWidth: 2});
+		
+		axisGeometry.vertices.push(new THREE.Vector3(x, y, z));
+		axisGeometry.vertices.push(new THREE.Vector3(x, 0, z));
+
+		yAxis  = new THREE.Line(axisGeometry, axisMaterial);
 
 		move(theta0);					
 	};
@@ -119,6 +107,7 @@ function PendulumView(L, x, y, z, theta0, sphereColor) {
 	function addToScene(scene) {
 		scene.add(sphere);
 		scene.add(line);
+		scene.add(yAxis);
 	};
 
 	function move(theta) {					
@@ -165,7 +154,8 @@ function CameraController(camera, height, width) {
 	var isRightKeyDown = false;
 	var isShiftKeyDown = false;
 	var isCtrKeyDown = false;
-	var zoomFactor = 0.01;
+	var ZOOM_FACTOR= 0.01;
+	var MOVE_FACTOR = 0.25;
 	init();
 
 	function init() {
@@ -178,15 +168,15 @@ function CameraController(camera, height, width) {
 	};
 
 	function onMouseMove( event ) {				
-		cameraAngleX = cameraLimit((- 2 * event.clientY / height + 1) * 1.5708);
-		cameraAngleY = cameraLimit((- 2 * event.clientX / width + 1) * 1.5708);
+		cameraAngleX = cameraLimit((- 2 * event.clientY / height + 1) * Math.PI / 2);
+		cameraAngleY = cameraLimit((- 2 * event.clientX / width + 1) * Math.PI / 2);
 	};
 
 	function cameraLimit(angle) {
-		if (angle > 1.5708) {
-			return 1.5708;
-		} else if (angle < -1.5708) {
-			return -1.5708;
+		if (angle > Math.PI / 2) {
+			return Math.PI / 2;
+		} else if (angle < - Math.PI / 2) {
+			return - Math.PI / 2;
 		} else {
 			return angle;
 		}				
@@ -220,6 +210,7 @@ function CameraController(camera, height, width) {
 	}
 
 	function onMouseWhell( event ) {
+		console.log(event);
 		camera.fov *= 1.1;
 		camera.updateProjectionMatrix();
 	}
@@ -231,17 +222,21 @@ function CameraController(camera, height, width) {
 		}
 
 		if (isUpKeyDown) {
-			camera.position.z -= 0.25;
+			camera.position.x -= MOVE_FACTOR*Math.sin(camera.rotation.y);
+			camera.position.z -= MOVE_FACTOR*Math.cos(camera.rotation.y);
 		} else if (isDownKeyDown) {
-			camera.position.z += 0.25;
+			camera.position.x += MOVE_FACTOR*Math.sin(camera.rotation.y);
+			camera.position.z += MOVE_FACTOR*Math.cos(camera.rotation.y);
 		} else if (isLeftKeyDown) {
-			camera.position.x -= 0.25;
+			camera.position.x -= MOVE_FACTOR*Math.cos(-camera.rotation.y);
+			camera.position.z -= MOVE_FACTOR*Math.sin(-camera.rotation.y);
 		} else if (isRightKeyDown) {
-			camera.position.x += 0.25;
+			camera.position.x += MOVE_FACTOR*Math.cos(-camera.rotation.y);
+			camera.position.z += MOVE_FACTOR*Math.sin(-camera.rotation.y);
 		} else if (isShiftKeyDown) {
-			camera.position.y += 0.25;
+			camera.position.y += MOVE_FACTOR;
 		} else if (isCtrKeyDown) {
-			camera.position.y -= 0.25;
+			camera.position.y -= MOVE_FACTOR;
 		}	
 	};
 
