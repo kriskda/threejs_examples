@@ -1,12 +1,15 @@
-var container = document.getElementById("container");
-var width = container.offsetWidth;
-var height = container.offsetHeight;
+var container = document.getElementById("threejs_container");
+var width = container.offsetWidth, height = container.offsetHeight;
 				   
 var scene = new THREE.Scene();
 
-var camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+var camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
 camera.position.y = 10;
 camera.position.z = 25;
+
+var controls = new THREE.FirstPersonControls(camera);
+controls.movementSpeed = 25;
+controls.lookSpeed = 0.25;
 
 //var renderer = new THREE.CanvasRenderer({antialias: true, preserveDrawingBuffer: true});
 var renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
@@ -30,7 +33,6 @@ scene.add( directionalLight );
 /* Phys initial values */
 var theta = Math.PI / 2, v = 0, L = 5, gamma = 0.01, dt = 0.001;
 
-var cameraController = CameraController(camera, height, width);
 var pendulumViewA = PendulumView(L, -10, 7, 0, theta, "rgb(255,0,0)");
 var pendulumModelA = PendulumModel(pendulumViewA, 9.81, L, theta, v, gamma);
 pendulumViewA.addToScene(scene);
@@ -42,6 +44,7 @@ pendulumViewB.addToScene(scene);
 var currentTime = getTimeInSeconds();
 var accumulator = 0;
 var time = 0;
+var clock = new THREE.Clock();
 
 animate();
 
@@ -61,13 +64,13 @@ function animate() {
 		time += dt;
 	}
 		
-	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s";
+	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s ";
 	pendulumModelA.updateView();	
-	pendulumModelB.updateView();									
-	cameraController.updateState();	
+	pendulumModelB.updateView();	
+	controls.update(clock.getDelta());								
 
 	requestAnimationFrame(animate);	
-	renderer.render(scene, camera);
+	renderer.render(scene, camera);	
 }
 
 function getTimeInSeconds() {
@@ -143,106 +146,4 @@ function PendulumModel(view, g, L, theta, v, gamma) {
 		updateView: updateView,
 	}
 }
-
-/* Camera controller controls camera state i.e. rotations, motion and zoom */
-function CameraController(camera, height, width) {
-	var cameraAngleX, cameraAngleY;
-	var isCameraRotating = false;
-	var isUpKeyDown = false;
-	var isDownKeyDown = false;
-	var isLeftKeyDown = false;
-	var isRightKeyDown = false;
-	var isShiftKeyDown = false;
-	var isCtrKeyDown = false;
-	var ZOOM_FACTOR= 0.01;
-	var MOVE_FACTOR = 0.25;
-	init();
-
-	function init() {
-		document.addEventListener( 'mousemove', onMouseMove, false );
-		document.addEventListener( 'mousedown', onMouseDown, false );
-		document.addEventListener( 'mouseup', onMouseUp, false );
-		document.addEventListener( 'keydown', onKeyDown, false );
-		document.addEventListener( 'keyup', onKeyUp, false );
-		document.addEventListener( 'mousewheel', onMouseWhell, false );
-	};
-
-	function onMouseMove( event ) {				
-		cameraAngleX = cameraLimit((- 2 * event.clientY / height + 1) * Math.PI / 2);
-		cameraAngleY = cameraLimit((- 2 * event.clientX / width + 1) * Math.PI / 2);
-	};
-
-	function cameraLimit(angle) {
-		if (angle > Math.PI / 2) {
-			return Math.PI / 2;
-		} else if (angle < - Math.PI / 2) {
-			return - Math.PI / 2;
-		} else {
-			return angle;
-		}				
-	};
-
-	function onMouseDown( event ) {		
-		isCameraRotating = true;
-	}
-
-	function onMouseUp( event ) {		
-		isCameraRotating = false;
-	}
-			
-	function onKeyDown( event ) {
-		setKeysState(event, true);
-	}
-
-	function onKeyUp( event ) {
-		setKeysState(event, false);
-	}
-
-	function setKeysState(event, booleanValue) {
-		switch ( event.keyCode ) {
-			case 16: isShiftKeyDown = booleanValue; break;
-			case 17: isCtrKeyDown = booleanValue; break;
-			case 37: isLeftKeyDown = booleanValue; break;
-			case 38: isUpKeyDown = booleanValue; break;
-			case 39: isRightKeyDown = booleanValue; break;
-			case 40: isDownKeyDown = booleanValue; break;
-		}
-	}
-
-	function onMouseWhell( event ) {
-		console.log(event);
-		camera.fov *= 1.1;
-		camera.updateProjectionMatrix();
-	}
-
-	function updateState() {
-		if (isCameraRotating) {
-			camera.rotation.x = cameraAngleX;
-			camera.rotation.y = cameraAngleY;
-		}
-
-		if (isUpKeyDown) {
-			camera.position.x -= MOVE_FACTOR*Math.sin(camera.rotation.y);
-			camera.position.z -= MOVE_FACTOR*Math.cos(camera.rotation.y);
-		} else if (isDownKeyDown) {
-			camera.position.x += MOVE_FACTOR*Math.sin(camera.rotation.y);
-			camera.position.z += MOVE_FACTOR*Math.cos(camera.rotation.y);
-		} else if (isLeftKeyDown) {
-			camera.position.x -= MOVE_FACTOR*Math.cos(-camera.rotation.y);
-			camera.position.z -= MOVE_FACTOR*Math.sin(-camera.rotation.y);
-		} else if (isRightKeyDown) {
-			camera.position.x += MOVE_FACTOR*Math.cos(-camera.rotation.y);
-			camera.position.z += MOVE_FACTOR*Math.sin(-camera.rotation.y);
-		} else if (isShiftKeyDown) {
-			camera.position.y += MOVE_FACTOR;
-		} else if (isCtrKeyDown) {
-			camera.position.y -= MOVE_FACTOR;
-		}	
-	};
-
-	return {
-		updateState: updateState,
-	}
-}
-
 

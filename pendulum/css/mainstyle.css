@@ -1,0 +1,77 @@
+html, body {
+	background: #fff;
+	font: arial, sans-serif
+}
+
+#container {
+	width: 1024px;
+	margin: auto;
+}
+
+#header {
+	margin: 10px;	
+}
+
+#header p {
+	font:bold 0.95em arial, sans-serif;
+}
+
+#content {
+	border: 1px double #c5c5c5;
+	margin: 10px;
+	padding: 10px;
+	-moz-border-radius:0.4em;
+	-khtml-border-radius:0.4em;
+}
+
+input.inputtext, input.outputtext {
+	padding:0.15em;
+	border:1px solid #ddd;
+	background:#fafafa;
+	width: 140px;
+	font:bold 0.95em arial, sans-serif;
+	-moz-border-radius:0.4em;
+	-khtml-border-radius:0.4em;
+}
+
+input.inputtext:hover, input.inputtext:focus {
+	border-color:#c5c5c5;
+	background:#f6f6f6;
+}
+
+input.outputtext {
+	color: gray;
+}
+
+select.chooser {border:1px solid #ddd;background:#fafafa;
+	width: 150px;
+}
+
+.formstyle {
+	background-color: #e1e1e1;
+	border: 1px double #989898;
+	margin: 7px;
+	padding: 7px;
+	-moz-border-radius:0.4em;
+	-khtml-border-radius:0.4em;
+}
+
+.theory {
+	background-color: #ededed;
+	border: 1px double #989898;
+	margin: 7px;
+	padding: 7px;
+	font: 0.95em arial, sans-serif;
+	color: #414141;
+	-moz-border-radius:0.4em;
+	-khtml-border-radius:0.4em;
+}
+
+
+.text {
+	text-align: justify;
+}
+
+table.plotarea {
+	margin: auto;
+}

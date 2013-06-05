@@ -1,12 +1,32 @@
+<!DOCTYPE html> 
 <html>
 	<head>
 		<title>Pendulum/s</title>
+
+		<link rel="stylesheet" type="text/css" href="css/mainstyle.css" />
 	</head>
 	<body>
-		<div id="container" style="width: 500px; height: 400px;" />
-		<p id="timer">t = 0 s</p>
+		<div id="container">
+
+			<div id="header">
+				<h1>Pendulum/s</h1>
+			</div>
+
+			<div id="content">
+
+				<table class="plotarea">  
+					<tr>
+						<td><p id="timer">t = 0 s</p><div id="threejs_container" style="width: 800px; height: 400px;" /></td>
+					</tr>
+				</table>
+
+			</div>
+
+		</div>
 		
 		<script src="js/three.min.js"></script>
+		<script src="js/controls/FirstPersonControls.js"></script>
+		<script src="js/controls/PointerLockControls.js"></script>
 		<script src="js/phys.js"></script>
 	</body>
 </html>
