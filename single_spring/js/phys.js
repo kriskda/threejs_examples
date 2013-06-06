@@ -104,10 +104,10 @@ function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 		line = new THREE.Line(lineGeometry, lineMaterial);
 
 		var yAxisGeometry = new THREE.Geometry();
-		yAxisGeometry.vertices.push(new THREE.Vector3(xp, yp - L0, zp));
+		yAxisGeometry.vertices.push(new THREE.Vector3(xp, yp, zp));
 		yAxisGeometry.vertices.push(new THREE.Vector3(xp, 0, zp));
 
-		yAxis  = new THREE.Line(yAxisGeometry, new THREE.LineDashedMaterial({color: "rgb(0,150,0)", lineWidth: 2}));
+		yAxis  = new THREE.Line(yAxisGeometry, new THREE.LineDashedMaterial({color: "rgb(100,250,100)", lineWidth: 0.5}));
 
 		move(stretch);					
 	};
