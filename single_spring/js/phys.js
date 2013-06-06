@@ -78,7 +78,7 @@ function getTimeInSeconds() {
 function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 	var sphere, line, yAxis;
 	var nodes = 15;
-	var CUBE_SIZE = 0.5, DELTA_X = 0.4;
+	var CUBE_SIZE = 0.5, DELTA_X = 0.25;
 	init();
 
 	function init() {
@@ -88,13 +88,12 @@ function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 		cube = new THREE.Mesh(cubeGeometry, cubeMaterial );
 
 		var lineGeometry = new THREE.Geometry();
-
 		var lineMaterial = new THREE.LineBasicMaterial({color: 0x000000, lineWidth: 1});
 
+		var deltaY2 = (cube.position.y + 0.5 * CUBE_SIZE - yp) / (nodes + 1) * 0.5;
 		lineGeometry.vertices.push(new THREE.Vector3(xp, yp, zp));
-		var sign = 1, mult = 1;
-		var deltaY2 = (cube.position.y + 0.5 * CUBE_SIZE - yp)/(nodes + 1)*0.5;
 
+		var sign = 1, mult = 1;
 		for (var i = 1 ; i < (nodes + 1) ; i++) {	
 			lineGeometry.vertices.push(new THREE.Vector3(xp + sign * DELTA_X , yp + mult * deltaY2, zp));
 			sign *= -1;
