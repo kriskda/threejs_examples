@@ -5,11 +5,11 @@ var scene = new THREE.Scene();
 
 var camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
 camera.position.x = 5;
-camera.position.y = 8;
-camera.position.z = 8;
-camera.rotation.x = -0.4;
-camera.rotation.y = 0.4;
-camera.rotation.z = 0.17;
+camera.position.y = 10;
+camera.position.z = 12;
+camera.rotation.x = -0.3;
+camera.rotation.y = 0.3;
+camera.rotation.z = 0.12;
 
 var controls = new THREE.FirstPersonControls(camera);
 controls.movementSpeed = 25;
@@ -77,8 +77,8 @@ function getTimeInSeconds() {
 /* Simple spring view which is just sphere and line with multiple vertices connected together  */
 function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 	var sphere, line, yAxis;
-	var nodes = 3;
-	var CUBE_SIZE = 0.5;
+	var nodes = 15;
+	var CUBE_SIZE = 0.5, DELTA_X = 0.4;
 	init();
 
 	function init() {
@@ -88,10 +88,19 @@ function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 		cube = new THREE.Mesh(cubeGeometry, cubeMaterial );
 
 		var lineGeometry = new THREE.Geometry();
+
 		var lineMaterial = new THREE.LineBasicMaterial({color: 0x000000, lineWidth: 1});
 
 		lineGeometry.vertices.push(new THREE.Vector3(xp, yp, zp));
-		lineGeometry.vertices.push(new THREE.Vector3(cube.position.x, cube.position.y + 0.5 * CUBE_SIZE, cube.position.z));
+		var sign = 1, mult = 1;
+		var deltaY2 = (cube.position.y + 0.5 * CUBE_SIZE - yp)/(nodes + 1)*0.5;
+
+		for (var i = 1 ; i < (nodes + 1) ; i++) {	
+			lineGeometry.vertices.push(new THREE.Vector3(xp + sign * DELTA_X , yp + mult * deltaY2, zp));
+			sign *= -1;
+			mult += 2;
+		}
+		lineGeometry.vertices.push(new THREE.Vector3(xp, yp + (mult - 1) * deltaY2, zp));
 
 		line = new THREE.Line(lineGeometry, lineMaterial);
 
@@ -113,7 +122,16 @@ function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 	function move(stretch) {					
 		cube.position.y = yp - L0 - stretch;
 
-		line.geometry.vertices[1].y = cube.position.y + 0.5 * CUBE_SIZE;
+		var deltaY2 = (cube.position.y + 0.5 * CUBE_SIZE - yp)/(nodes + 1)*0.5;
+
+		var index = 1, mult = 1;
+		for (var i = 1 ; i <= (nodes + 1) ; i++) {
+			line.geometry.vertices[index].y = yp + mult * deltaY2;
+			mult += 2;
+			index++;
+		}
+		line.geometry.vertices[nodes + 1].y = yp + (mult - 1) * deltaY2;
+
 		line.geometry.verticesNeedUpdate = true;
 	};
 
