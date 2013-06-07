@@ -4,12 +4,12 @@ var width = container.offsetWidth, height = container.offsetHeight;
 var scene = new THREE.Scene();
 
 var camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
-camera.position.x = 5;
-camera.position.y = 10;
-camera.position.z = 12;
+camera.position.x = 60;
+camera.position.y = 5;
+camera.position.z = 60;
 camera.rotation.x = -0.3;
-camera.rotation.y = 0.3;
-camera.rotation.z = 0.12;
+camera.rotation.y = 0.7;
+camera.rotation.z = 0.15;
 
 var controls = new THREE.FirstPersonControls(camera);
 controls.movementSpeed = 25;
@@ -35,11 +35,22 @@ directionalLight.position.set(10, 50, 50);
 scene.add( directionalLight );
 
 /* Phys initial values */
-var L0 = 2.5, stretch = -1, dt = 0.001, k = 6, b = 0.1, m = 0.5;
+var L0 = 2.5, dt = 0.001, b = 0.1;
 
-var simpleSpringView = SimpleSpringView(0, 10, 0, L0, stretch, "rgb(255,0,0)"); 
-var simpleSpringModel = SimpleSpringModel(simpleSpringView, 9.81, k, b, m, stretch, 0); 
-simpleSpringView.addToScene(scene);
+var springModelArray = [];
+
+/* Initalizing models and views */
+for (var i = -10 ; i <= 10 ; i++) {
+	for (var j = -10 ; j <= 10 ; j++) {		
+		var stretch = -Math.floor((Math.random()*2) + 0.1);
+		var m = Math.floor((Math.random()*1) + 0.5);
+		var k = Math.floor((Math.random()*10) + 2);
+		
+		var simpleSpringView = SimpleSpringView(i*5, 10, j*5, L0, stretch, "rgb(255,0,0)"); 
+		springModelArray.push(SimpleSpringModel(simpleSpringView, 9.81, k, b, m, stretch, 0));
+		simpleSpringView.addToScene(scene);
+	}
+}
 
 var currentTime = getTimeInSeconds();
 var accumulator = 0;
@@ -49,6 +60,8 @@ var clock = new THREE.Clock();
 animate();
 
 /* Rendering function */
+var modelArrayLength = springModelArray.length;
+
 function animate() {
 	newTime = getTimeInSeconds();
 	frameTime = newTime - currentTime;
@@ -57,13 +70,17 @@ function animate() {
         accumulator += frameTime;
 
 	while (accumulator >= dt) {
-		simpleSpringModel.calculateTimeStep(dt);
+		for (var i = 0 ; i < modelArrayLength ; i++) {	
+			springModelArray[i].calculateTimeStep(dt);
+		}
 		accumulator -= dt;
 		time += dt;
 	}
 		
 	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s ";
-	simpleSpringModel.updateView();		
+	for (var i = 0 ; i < modelArrayLength ; i++) {	
+		springModelArray[i].updateView();	
+	}	
 	//controls.update(clock.getDelta());								
 
 	requestAnimationFrame(animate);	
