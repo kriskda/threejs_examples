@@ -42,8 +42,8 @@ var springModelArray = [];
 /* Initalizing models and views */
 for (var i = -10 ; i <= 10 ; i++) {
 	for (var j = -10 ; j <= 10 ; j++) {		
-		var stretch = -Math.floor((Math.random()*2) + 0.1);
-		var m = Math.floor((Math.random()*1) + 0.5);
+		var stretch = -Math.floor((Math.random()*2) + 1);
+		var m = Math.floor((Math.random()*2) + 1);
 		var k = Math.floor((Math.random()*10) + 2);
 		
 		var simpleSpringView = SimpleSpringView(i*5, 10, j*5, L0, stretch, "rgb(255,0,0)"); 
