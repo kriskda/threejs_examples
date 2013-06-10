@@ -161,11 +161,14 @@ function SimpleSpringView(xp, yp, zp, L0, stretch, sphereColor) {
 
 /* Simple spring model which contains equation of motion and simple Euler integration scheme. Model updates view more or less as in MVC */
 function SimpleSpringModel(view, g, k, b, m, y, v) {				
-	var y, v;
+	var y, v, yNew, vNew;
 			
 	function calculateTimeStep(dt) {
-		y  = y + v*dt;
-		v = v + (-k / m * y - b / m * v + g) * dt;	
+		yNew  = y + v*dt;
+		vNew = v + (-k / m * y - b / m * v + g) * dt;	
+
+		y = yNew;
+		v = vNew;
 	};
 
 	function updateView() {

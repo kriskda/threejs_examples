@@ -130,11 +130,14 @@ function PendulumView(L, x, y, z, theta0, sphereColor) {
 
 /* Pendulum model which contains equation of motion and simple Euler integration scheme. Model updates view more or less as in MVC */
 function PendulumModel(view, g, L, theta, v, gamma) {				
-	var theta, v;
+	var theta, v, thetaNew, vNew;
 			
 	function calculateTimeStep(dt) {
-		theta  = theta + v*dt;
-		v = v + (- g / L * Math.sin(theta)  - gamma * v) * dt;	
+		thetaNew  = theta + v*dt;
+		vNew = v + (- g / L * Math.sin(theta)  - gamma * v) * dt;	
+
+		theta = thetaNew;
+		v = vNew;
 	};
 
 	function updateView() {
