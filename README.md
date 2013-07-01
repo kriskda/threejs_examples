@@ -6,4 +6,5 @@ Some examples developed using three.js:
    2. pendulum - two pendulums with drag
    3. single_spring - single mass connected to spring with some "k" constant and "b" damping parameter
    4. spring_farm - a lot of springs...
+   5. tutorials - simple step-by-step examples
 
