@@ -67,7 +67,7 @@ function animate() {
 	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s ";
 	pendulumModelA.updateView();	
 	pendulumModelB.updateView();	
-	controls.update(clock.getDelta());								
+	//controls.update(clock.getDelta());								
 
 	requestAnimationFrame(animate);	
 	renderer.render(scene, camera);	

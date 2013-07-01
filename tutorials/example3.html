@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Podstawy Three.js</title>    
+    <script src="three.min.js"></script>
+    <script>
+    window.onload = function() {
+        var renderer = new THREE.WebGLRenderer({antialias: true});
+	//var renderer = new THREE.CanvasRenderer();
+        renderer.setSize(800, 600);
+	renderer.setClearColor(0xEEEEEE, 1);
+
+	// Wszystko będzie renderowana w elemencie <body></body>. Oczywiście można też np: document.getElementById("threejs_container")
+        document.body.appendChild(renderer.domElement);
+
+	// Scena do której dodawane będą renderowane obiekty
+        var scene = new THREE.Scene();
+
+	// Tworzymy kamerę: pole widzenia, skala obrazu, zNear, zFar  
+	var camera = new THREE.PerspectiveCamera(65, 800 / 600, 1, 10000);
+	camera.position.set(10, 5, 10);
+
+	// Nasz pierwszy obiekt
+	var geometry = new THREE.CubeGeometry(1, 1, 1);
+	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
+	cube = new THREE.Mesh(geometry, material);
+	cube.position.x = -1;
+	scene.add(cube);
+
+	// Drugi obiekt
+	var geometry = new THREE.SphereGeometry(0.5, 20, 20);
+	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
+	sphere = new THREE.Mesh(geometry, material);
+	sphere.position.x = 1;
+	scene.add(sphere);
+
+	// Siatka, punkt odniesienia
+	var plane = new THREE.Mesh(
+		new THREE.PlaneGeometry(50, 50, 20, 20), 
+		new THREE.MeshPhongMaterial({wireframe: true}));
+	plane.rotation.x = - Math.PI / 2;
+	scene.add(plane);
+
+	// Oświetlenie
+        var light = new THREE.PointLight(0xFFFF00);
+        light.position.set(300, 300, 10);
+        scene.add( light );
+
+	// Animujemy ruch
+	animate();
+
+	function animate() {
+		cube.rotation.x += 0.01;
+		cube.rotation.y += 0.01;		
+
+		sphere.position.x += 0.025;
+		camera.lookAt(sphere.position);
+
+		requestAnimationFrame(animate);
+		renderer.render(scene, camera);	
+	}
+
+    };
+    </script>
+</head>
+<body></body>
+</html>

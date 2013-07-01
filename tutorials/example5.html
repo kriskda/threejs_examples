@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Podstawy Three.js</title>    
+    <script src="three.min.js"></script>
+    <script>
+    window.onload = function() {
+        var renderer = new THREE.WebGLRenderer({antialias: true});
+	//var renderer = new THREE.CanvasRenderer();
+        renderer.setSize(800, 600);
+	renderer.setClearColor(0xEEEEEE, 1);
+
+	// Wszystko będzie renderowana w elemencie <body></body>. Oczywiście można też np: document.getElementById("threejs_container")
+        document.body.appendChild(renderer.domElement);
+
+	// Scena do której dodawane będą renderowane obiekty
+        var scene = new THREE.Scene();
+
+	// Tworzymy kamerę: pole widzenia, skala obrazu, zNear, zFar  
+	var camera = new THREE.PerspectiveCamera(65, 800 / 600, 1, 10000);
+	camera.position.set(10, 5, 10);
+
+	// Nasz pierwszy obiekt
+	var geometry = new THREE.CubeGeometry(1, 1, 1);
+	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
+	cube = new THREE.Mesh(geometry, material);
+	cube.position.x = -1;
+	scene.add(cube);
+
+	// Drugi obiekt
+	var geometry = new THREE.SphereGeometry(0.5, 20, 20);
+	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
+	sphere = new THREE.Mesh(geometry, material);
+	sphere.position.x = 1;
+	scene.add(sphere);
+
+	// Siatka, punkt odniesienia
+	var plane = new THREE.Mesh(
+		new THREE.PlaneGeometry(50, 50, 20, 20), 
+		new THREE.MeshPhongMaterial({wireframe: true}));
+	plane.rotation.x = - Math.PI / 2;
+	scene.add(plane);
+
+	// Oświetlenie
+        var light = new THREE.PointLight(0xFFFF00);
+        light.position.set(300, 300, 10);
+        scene.add( light );
+
+	// Animujemy ruch
+	var posX = sphere.position.x, posY = sphere.position.y;
+	var velX = 10, velY = 10;
+	var C = 0.005, g = 9.81, dt = 0.01;
+
+	var currentTime = getTimeInSeconds();
+	var accumulator = 0;
+
+	function calculateBallisticPosition() {
+		var vel = Math.sqrt(velX * velX + velY * velY);
+
+		posX  = posX + velX * dt;
+		posY  = posY + velY * dt;
+		
+		velX = velX - C * vel * velX * dt;
+		velY = velY - (C * vel * velY + g) * dt;
+
+		return [posX, posY];
+	}
+
+	function getTimeInSeconds() {
+		return new Date().getTime() / 1000;
+	}
+
+	animate();
+
+	function animate() {
+		cube.rotation.x += 0.01;
+		cube.rotation.y += 0.01;		
+
+		var pos = [sphere.position.x, sphere.position.y];
+		var newTime = getTimeInSeconds();
+		var frameTime = newTime - currentTime;
+        	currentTime = newTime;
+
+        	accumulator += frameTime;
+
+		while (accumulator >= dt) {
+			if (sphere.position.y >= 0) {
+				pos = calculateBallisticPosition(); 				
+			}
+ 			
+			accumulator -= dt;
+		}
+
+		sphere.position.x = pos[0];
+		sphere.position.y = pos[1];
+
+		camera.lookAt(sphere.position);
+
+		requestAnimationFrame(animate);
+		renderer.render(scene, camera);	
+	}
+
+    };
+    </script>
+</head>
+<body></body>
+</html>
