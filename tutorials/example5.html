@@ -20,18 +20,12 @@
 	var camera = new THREE.PerspectiveCamera(65, 800 / 600, 1, 10000);
 	camera.position.set(10, 2, 10);
 
-	// Nasz pierwszy obiekt
-	var geometry = new THREE.CubeGeometry(1, 1, 1);
-	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
-	cube = new THREE.Mesh(geometry, material);
-	cube.position.x = -1;
-	scene.add(cube);
-
 	// Drugi obiekt
 	var geometry = new THREE.SphereGeometry(0.5, 20, 20);
 	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
 	sphere = new THREE.Mesh(geometry, material);
-	sphere.position.x = 1;
+	sphere.position.x = 0;
+	sphere.position.y = 0.5;
 	scene.add(sphere);
 
 	// Siatka, punkt odniesienia
@@ -47,36 +41,16 @@
         scene.add( light );
 
 	// Animujemy ruch
-	var posX = sphere.position.x, posY = sphere.position.y;
-	var velX = 10, velY = 10;
-	var C = 0.05, g = 9.81, dt = 0.01;
-
+	var C = 0.1, g = 9.81, dt = 0.001;
+	var posVect = [sphere.position.x, sphere.position.y];
+	var velVect = [10, 10];
+	
 	var currentTime = getTimeInSeconds();
 	var accumulator = 0;
-
-	function calculateBallisticPosition() {
-		var vel = Math.sqrt(velX * velX + velY * velY);
-
-		posX  = posX + velX * dt;
-		posY  = posY + velY * dt;
-		
-		velX = velX - C * vel * velX * dt;
-		velY = velY - (C * vel * velY + g) * dt;
-
-		return [posX, posY];
-	}
-
-	function getTimeInSeconds() {
-		return new Date().getTime() / 1000;
-	}
 
 	animate();
 
 	function animate() {
-		cube.rotation.x += 0.01;
-		cube.rotation.y += 0.01;		
-
-		var pos = [sphere.position.x, sphere.position.y];
 		var newTime = getTimeInSeconds();
 		var frameTime = newTime - currentTime;
         	currentTime = newTime;
@@ -84,20 +58,36 @@
         	accumulator += frameTime;
 
 		while (accumulator >= dt) {
-			if (sphere.position.y >= 0) {
-				pos = calculateBallisticPosition(); 				
-			}
- 			
+			calculateBallisticPosition(); 							 			
 			accumulator -= dt;
 		}
 
-		sphere.position.x = pos[0];
-		sphere.position.y = pos[1];
+		sphere.position.x = posVect[0];
+		sphere.position.y = posVect[1];
 
 		camera.lookAt(sphere.position);
 
 		requestAnimationFrame(animate);
 		renderer.render(scene, camera);	
+	}
+
+	function getTimeInSeconds() {
+		return new Date().getTime() / 1000;
+	}
+
+	function calculateBallisticPosition() {
+		var vel = Math.sqrt(velVect[0] * velVect[0] + velVect[1] * velVect[1]);
+
+		posVect[0]  = posVect[0] + velVect[0] * dt;
+		posVect[1]  = posVect[1] + velVect[1]  * dt;
+		
+		velVect[0]  = velVect[0]  - C * vel * velVect[0]  * dt;
+		velVect[1]  = velVect[1]  - (C * vel * velVect[1]  + g) * dt;
+
+		if (posVect[1] < 0.5) {
+			posVect[1] = 0.5;
+			velVect[1] = -velVect[1] - 0.5;
+		}
 	}
 
     };
