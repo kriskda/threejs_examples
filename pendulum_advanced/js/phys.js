@@ -9,13 +9,15 @@ camera.position.y = 10;
 camera.position.z = 25;
 
 //var renderer = new THREE.CanvasRenderer();
-var renderer = new THREE.WebGLRenderer({antialias: true, preserveDrawingBuffer: true});
-renderer.setSize( width, height);
+var renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(width, height);
 
 container.appendChild(renderer.domElement);
 	
 /* GRID */
-var planeHorizontal = new THREE.Mesh(new THREE.PlaneGeometry(100, 100, 20, 20), new THREE.MeshPhongMaterial({color: "rgb(0, 0, 0)", wireframe: true}));
+var planeHorizontal = new THREE.Mesh(
+	new THREE.PlaneGeometry(100, 100, 20, 20), 
+	new THREE.MeshPhongMaterial({color: "rgb(0, 0, 0)", wireframe: true}));
 planeHorizontal.rotation.x = - Math.PI / 2;
 scene.add(planeHorizontal);
 		
@@ -38,6 +40,7 @@ var pendulumViewB = PendulumView(L, 10, 7, 0, theta, "rgb(0,255,0)");
 var pendulumModelB = PendulumModel(pendulumViewB, 1.57, L, theta, v, gamma);
 pendulumViewB.addToScene(scene);
 
+/* Simulation values */
 var currentTime = getTimeInSeconds();
 var accumulator = 0;
 var time = 0;
@@ -68,11 +71,13 @@ function animate() {
 		pendulumModelA.calculateTimeStep(dt);
 		pendulumModelB.calculateTimeStep(dt);
 
-		accumulator -= dt;
-		time += dt;
+		accumulator -= dt;		
 	}
+
+	//console.log(frameTime);
+
+	time += clock.getDelta();
 		
-	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s ";
 	pendulumModelA.updateView();	
 	pendulumModelB.updateView();	
 
@@ -82,6 +87,8 @@ function animate() {
 	plot.setData([plotModelDataA.getData(), plotModelDataB.getData()]);
 	plot.setupGrid()
 	plot.draw();
+
+	document.getElementById('timer').innerHTML = "t = " + Math.round(time * 100) / 100 + " s ";
 
 	requestAnimationFrame(animate);	
 	renderer.render(scene, camera);	
