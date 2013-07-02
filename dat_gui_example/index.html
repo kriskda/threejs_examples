@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple dat.GUI example</title>    
+    <script src="three.min.js"></script>
+    <script type="text/javascript" src="dat.gui.min.js"></script>
+    <script>
+    window.onload = function() {
+        var renderer = new THREE.WebGLRenderer({antialias: true});
+	//var renderer = new THREE.CanvasRenderer();
+        renderer.setSize(800, 600);
+	renderer.setClearColor(0xEEEEEE, 1);
+
+	// Wszystko będzie renderowana w elemencie <body></body>. Oczywiście można też np: document.getElementById("threejs_container")
+        document.body.appendChild(renderer.domElement);
+
+	// Scena do której dodawane będą renderowane obiekty
+        var scene = new THREE.Scene();
+
+	// Tworzymy kamerę: pole widzenia, skala obrazu, zNear, zFar  
+	var camera = new THREE.PerspectiveCamera(25, 800 / 600, 1, 10000);
+	camera.position.set(10, 2, 10);
+ 
+	// Nasz pierwszy obiekt
+	var geometry = new THREE.CubeGeometry(1, 1, 1);
+	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
+	cube = new THREE.Mesh(geometry, material);
+	cube.position.x = -1;
+	scene.add(cube);
+
+	// Oświetlenie
+        var light = new THREE.PointLight(0xFFFF00);
+        light.position.set(300, 300, 10);
+        scene.add( light );
+
+	camera.lookAt(cube.position);
+
+	var gui = new dat.GUI();
+
+      	gui.add(cube.scale, 'x', 0.1, 10, 0.1);
+      	gui.add(cube.scale, 'y', 0.1, 10, 0.1);
+      	gui.add(cube.scale, 'z', 0.1, 10, 0.1);
+
+	gui.add(cube.rotation, 'x', 0.1, 10, 0.1);
+	gui.add(cube.rotation, 'y', 0.1, 10, 0.1);
+	gui.add(cube.rotation, 'z', 0.1, 10, 0.1);
+	
+       	animate();
+
+	function animate() {
+		requestAnimationFrame(animate);
+		renderer.render(scene, camera);	
+	}
+
+    };
+    </script>
+</head>
+<body></body>
+</html>
