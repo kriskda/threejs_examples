@@ -28,9 +28,9 @@
 	scene.add(cube);
 
 	// Drugi obiekt
-	var geometry = new THREE.SphereGeometry(0.5, 20, 20);
-	var material = new THREE.MeshPhongMaterial({color: 0xFF0000});
-	sphere = new THREE.Mesh(geometry, material);
+	var sphere = new THREE.Mesh(
+		new THREE.SphereGeometry(0.5, 20, 20), 
+		new THREE.MeshPhongMaterial({color: 0xFF0000}));
 	sphere.position.x = 1;
 	scene.add(sphere);
 

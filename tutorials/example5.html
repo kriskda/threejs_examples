@@ -41,9 +41,9 @@
         scene.add( light );
 
 	// Animujemy ruch
-	var C = 0.1, g = 9.81, dt = 0.005;
+	var C = 0.5, g = 9.81, dt = 0.01;
 	var posVect = [sphere.position.x, sphere.position.y];
-	var velVect = [10, 10];
+	var velVect = [50, 50];
 	
 	var currentTime = getTimeInSeconds();
 	var accumulator = 0;
@@ -78,16 +78,17 @@
 	function calculateBallisticPosition() {
 		var vel = Math.sqrt(velVect[0] * velVect[0] + velVect[1] * velVect[1]);
 
+		velVect [0]  = velVect[0]  - C * vel * velVect[0]  * dt;
+		velVect [1]  = velVect[1]  - (C * vel * velVect[1]  + g) * dt;
+
 		posVect[0]  = posVect[0] + velVect[0] * dt;
 		posVect[1]  = posVect[1] + velVect[1]  * dt;
-		
-		velVect[0]  = velVect[0]  - C * vel * velVect[0]  * dt;
-		velVect[1]  = velVect[1]  - (C * vel * velVect[1]  + g) * dt;
 
 		if (posVect[1] < 0.5) {
 			posVect[1] = 0.5;
-			velVect[1] = -velVect[1] - 0.7;
+			velVect[1] = -velVect[1] ;
 		}
+
 	}
 
     };
