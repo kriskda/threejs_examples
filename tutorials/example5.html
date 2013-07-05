@@ -53,9 +53,9 @@
 	function animate() {
 		var newTime = getTimeInSeconds();
 		var frameTime = newTime - currentTime;
-        	currentTime = newTime;
+        currentTime = newTime;
 
-        	accumulator += frameTime;
+        accumulator += frameTime;
 
 		while (accumulator >= dt) {
 			calculateBallisticPosition(); 							 			
